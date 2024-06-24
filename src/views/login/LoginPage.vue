@@ -1,7 +1,9 @@
 <script setup>
 import { User, Lock } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import { userRegisterService } from '@/api/user.js'
 const isRegister = ref(true)
+const form = ref()
 
 // 注册
 const formModel = ref({
@@ -35,6 +37,13 @@ const rules = {
     }
   ]
 }
+
+const register = async () => {
+  await form.value.validate()
+  await userRegisterService(formModel.value)
+  ElMessage.success('Oops, this is a error message.')
+  isRegister.value = false
+}
 </script>
 
 <template>
@@ -55,7 +64,7 @@ const rules = {
           <el-input :prefix-icon="Lock" type="password" placeholder="请输入再次密码" v-model="formModel.repassword"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button class="button" type="primary" auto-insert-space> 注册 </el-button>
+          <el-button class="button" type="primary" auto-insert-space @click="register()"> 注册 </el-button>
         </el-form-item>
         <el-form-item class="flex">
           <el-link type="info" :underline="false" @click="isRegister = false"> ← 返回 </el-link>
