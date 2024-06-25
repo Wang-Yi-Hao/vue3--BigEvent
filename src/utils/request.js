@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { useUserStore } from '@/stores'
-import { ElMessage } from 'element-plus'
 import router from '@/router'
 
 const baseURL = 'http://big-event-vue-api-t.itheima.net'
@@ -26,11 +25,8 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (res) => {
     // TODO 3. 处理业务失败
-    if (res.data.code === 0) {
-      ElMessage({
-        message: res.data.message,
-        type: 'success'
-      })
+    if (res.data.code == 0) {
+      ElMessage.success(res.data.message || '请求成功')
       return res
     }
     // TODO 4. 摘取核心响应数据

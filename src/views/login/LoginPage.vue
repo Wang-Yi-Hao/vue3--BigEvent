@@ -1,9 +1,13 @@
 <script setup>
 import { User, Lock } from '@element-plus/icons-vue'
-import { ref } from 'vue'
-import { userRegisterService } from '@/api/user.js'
-const isRegister = ref(true)
+import { ref, watch } from 'vue'
+import { userRegisterService, userLoginService } from '@/api/user.js'
+import { useUserStore } from '@/stores'
+import { useRouter } from 'vue-router'
+const isRegister = ref(false)
 const form = ref()
+const userStore = useUserStore()
+const router = useRouter()
 
 // 注册
 const formModel = ref({
@@ -18,13 +22,11 @@ const rules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 9, max: 15, message: '密码长度在9-15位', trigger: 'change' },
-    { pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]/, message: '密码至少包含一个字母和一个数字', trigger: 'blur' }
+    { min: 6, max: 15, message: '密码长度在6-15位', trigger: 'change' }
   ],
   repassword: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 9, max: 15, message: '密码长度在9-15位', trigger: 'change' },
-    { pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]/, message: '密码至少包含一个字母和一个数字', trigger: 'blur' },
+    { min: 6, max: 15, message: '密码长度在6-15位', trigger: 'change' },
     {
       validator: (rule, value, callback) => {
         if (value !== formModel.value.password) {
@@ -39,11 +41,30 @@ const rules = {
 }
 
 const register = async () => {
-  await form.value.validate()
-  await userRegisterService(formModel.value)
-  ElMessage.success('Oops, this is a error message.')
-  isRegister.value = false
+  if (isRegister.value) {
+    await form.value.validate()
+    await userRegisterService(formModel.value)
+    isRegister.value = false
+    formModel.value = {
+      username: '',
+      password: '',
+      repassword: ''
+    }
+  } else {
+    await form.value.validate()
+    const res = await userLoginService(formModel.value)
+    userStore.setToken(res.data.token)
+    router.push('/')
+  }
 }
+
+watch(isRegister, () => {
+  formModel.value = {
+    username: '',
+    password: '',
+    repassword: ''
+  }
+})
 </script>
 
 <template>
@@ -70,15 +91,15 @@ const register = async () => {
           <el-link type="info" :underline="false" @click="isRegister = false"> ← 返回 </el-link>
         </el-form-item>
       </el-form>
-      <el-form ref="form" size="large" autocomplete="off" v-else>
+      <el-form ref="form" size="large" autocomplete="off" v-else :model="formModel" :rules="rules">
         <el-form-item>
           <h1>登录</h1>
         </el-form-item>
-        <el-form-item>
-          <el-input :prefix-icon="User" placeholder="请输入用户名"></el-input>
+        <el-form-item prop="username">
+          <el-input :prefix-icon="User" placeholder="请输入用户名" v-model="formModel.username"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input name="password" :prefix-icon="Lock" type="password" placeholder="请输入密码"></el-input>
+        <el-form-item prop="password">
+          <el-input name="password" :prefix-icon="Lock" type="password" placeholder="请输入密码" v-model="formModel.password"></el-input>
         </el-form-item>
         <el-form-item class="flex">
           <div class="flex">
@@ -87,7 +108,7 @@ const register = async () => {
           </div>
         </el-form-item>
         <el-form-item>
-          <el-button class="button" type="primary" auto-insert-space>登录</el-button>
+          <el-button class="button" type="primary" auto-insert-space @click="register()">登录</el-button>
         </el-form-item>
         <el-form-item class="flex">
           <el-link type="info" :underline="false" @click="isRegister = true"> 注册 → </el-link>
