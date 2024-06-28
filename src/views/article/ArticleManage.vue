@@ -55,6 +55,15 @@ const onReset = () => {
   params.value.state = ''
   getArticleList()
 }
+
+const onSuccess = (type) => {
+  if (type === 'add') {
+    const lastPage = Math.ceil((total.value + 1) / params.value.pagesize)
+    params.value.pagenum = lastPage
+    console.log(lastPage)
+  }
+  getArticleList()
+}
 </script>
 
 <template>
@@ -107,6 +116,6 @@ const onReset = () => {
       style="margin-top: 30px; justify-content: flex-end"
     />
 
-    <ArticleEdit ref="articleEditRef"></ArticleEdit>
+    <ArticleEdit ref="articleEditRef" @success="onSuccess"></ArticleEdit>
   </page-container>
 </template>

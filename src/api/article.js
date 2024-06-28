@@ -14,3 +14,12 @@ export const artDelChannelsService = (id) => request.delete('/my/cate/del', { pa
 
 // 获取文章列表
 export const artGetArticleService = (params) => request.get('/my/article/list', { params })
+
+// 发布文章
+export const artAddArticleService = (data) => request.post('/my/article/add', data)
+
+// 更新文章
+export const artInfoArticleService = (data) => request.put('/my/article/info', data)
+
+// 获取文章详情
+export const artGetDetailService = (id) => request.get('/my/article/info', { params: { id } })
