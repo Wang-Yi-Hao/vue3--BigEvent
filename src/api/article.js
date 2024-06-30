@@ -23,3 +23,6 @@ export const artInfoArticleService = (data) => request.put('/my/article/info', d
 
 // 获取文章详情
 export const artGetDetailService = (id) => request.get('/my/article/info', { params: { id } })
+
+// 删除文章
+export const artDelDetailService = (id) => request.delete('/my/article/info', { params: { id } })

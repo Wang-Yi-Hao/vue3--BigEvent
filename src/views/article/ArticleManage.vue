@@ -2,13 +2,15 @@
 import { Delete, Edit } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import ChannelSelect from './components/ChannelSelect.vue'
-import { artGetArticleService } from '@/api/article.js'
+import { artGetArticleService, artDelDetailService } from '@/api/article.js'
 import { formatTime } from '@/utils/format'
 import ArticleEdit from './components/ArticleEdit.vue'
+import ArticleDetails from './components/ArticleDetails.vue'
 
 const loding = ref(false)
 
 const articleEditRef = ref()
+const ArticleDetailsRef = ref()
 
 const params = ref({
   pagenum: 1,
@@ -64,6 +66,20 @@ const onSuccess = (type) => {
   }
   getArticleList()
 }
+
+const onDeleteArticle = async (row) => {
+  await ElMessageBox.confirm('你确定要删除该文章吗', '删除', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+  await artDelDetailService(row.id)
+  getArticleList()
+}
+
+const onDetailsArticle = (row) => {
+  ArticleDetailsRef.value.open(row)
+}
 </script>
 
 <template>
@@ -89,7 +105,7 @@ const onSuccess = (type) => {
     <el-table :data="articleList" style="width: 100" v-loading="loding">
       <el-table-column label="文章标题">
         <template #default="{ row }">
-          <el-link :underline="false" type="primary">{{ row.title }}</el-link>
+          <el-link :underline="false" type="primary" @click="onDetailsArticle(row)">{{ row.title }}</el-link>
         </template>
       </el-table-column>
       <el-table-column label="分类" prop="cate_name"></el-table-column>
@@ -99,7 +115,7 @@ const onSuccess = (type) => {
       <el-table-column label="状态" prop="state"></el-table-column>
       <el-table-column label="操作" #default="{ row }">
         <el-button type="primary" :icon="Edit" circle plain @click="onEditArticle(row)"></el-button>
-        <el-button :icon="Delete" circle plain @click="onDeleteArticle(row)"></el-button>
+        <el-button type="danger" :icon="Delete" circle plain @click="onDeleteArticle(row)"></el-button>
       </el-table-column>
     </el-table>
 
@@ -117,5 +133,6 @@ const onSuccess = (type) => {
     />
 
     <ArticleEdit ref="articleEditRef" @success="onSuccess"></ArticleEdit>
+    <ArticleDetails ref="ArticleDetailsRef"></ArticleDetails>
   </page-container>
 </template>
